@@ -1,105 +1,94 @@
-CREATE DATABASE PaperSoft;
+create database papersoft;
+use papersoft;
 
-USE PaperSoft;
-
-CREATE TABLE Endereco (
-    Id_Endereco INT AUTO_INCREMENT PRIMARY KEY, 
-    Logradouro_Endereco VARCHAR(225) NOT NULL, 
-    Numero_Endereco INT NOT NULL,                
-    Bairro_Endereco VARCHAR(225) NOT NULL,      
-    Cidade_Endereco VARCHAR(225) NOT NULL,      
-    CEP_Endereco VARCHAR(10) NOT NULL           
+CREATE TABLE clientes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cpf VARCHAR(14) UNIQUE NOT NULL,
+    telefone VARCHAR(20),
+    email VARCHAR(100)
 );
 
-CREATE TABLE Produto (
-    Id_Produto INT AUTO_INCREMENT PRIMARY KEY, 
-    Cod_Produto INT NOT NULL,                 
-    Tipo_Produto VARCHAR(225) NOT NULL,        
-    Nome_Produto VARCHAR(225) NOT NULL,        
-    Marca_Produto VARCHAR(255) NOT NULL,       
-    Estoque_Atual INT NOT NULL DEFAULT 0,      
-    Valor_Produto DECIMAL(10,2) NOT NULL       
+CREATE TABLE categorias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE Cliente (
-    Id_Cliente INT AUTO_INCREMENT PRIMARY KEY, 
-    Cod_Cliente INT NOT NULL,                   
-    Nome_Cliente VARCHAR(225) NOT NULL,        
-    CPF_Cliente VARCHAR(14) NOT NULL,           
-    Tel_Cliente VARCHAR(15) NOT NULL,          
-    Email_Cliente VARCHAR(225) NOT NULL,        
-    Id_Endereco INT,                           
-    FOREIGN KEY (Id_Endereco) REFERENCES Endereco(Id_Endereco)  
+CREATE TABLE fornecedores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cnpj VARCHAR(18) NOT NULL,
+    telefone VARCHAR(20),
+    email VARCHAR(100),
+    endereco TEXT
 );
 
-CREATE TABLE NotaFiscal (
-    Id_NotaFiscal INT AUTO_INCREMENT PRIMARY KEY,
-    Cod_NotaFiscal INT NOT NULL,                  
-    ValorPedido_NotaFiscal DECIMAL(10,2) NOT NULL, 
-    DataPedido_NotaFiscal DATE NOT NULL,           
-    DataEntrega_NotaFiscal DATE NOT NULL,          
-    Id_Endereco INT,                              
-    FOREIGN KEY (Id_Endereco) REFERENCES Endereco(Id_Endereco) 
+CREATE TABLE produtos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    preco DECIMAL(10,2) NOT NULL,
+    estoque INT NOT NULL,
+    id_categoria INT,
+    id_fornecedor INT,
+    FOREIGN KEY (id_categoria) REFERENCES categorias(id),
+    FOREIGN KEY (id_fornecedor) REFERENCES fornecedores(id)
 );
 
-
-CREATE TABLE Fornecedor (
-    Id_Fornecedor INT AUTO_INCREMENT PRIMARY KEY, 
-    Cod_Fornecedor INT NOT NULL,                 
-    Nome_Fornecedor VARCHAR(225) NOT NULL,       
-    CNPJ_Fornecedor VARCHAR(18) NOT NULL,         
-    Id_Endereco INT,                              
-    Id_Produto INT,                              
-    Id_NotaFiscal INT,                            
-    FOREIGN KEY (Id_Endereco) REFERENCES Endereco(Id_Endereco), 
-    FOREIGN KEY (Id_Produto) REFERENCES Produto(Id_Produto),   
-    FOREIGN KEY (Id_NotaFiscal) REFERENCES NotaFiscal(Id_NotaFiscal) 
+CREATE TABLE funcionarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cpf VARCHAR(14) UNIQUE NOT NULL,
+    cargo VARCHAR(50),
+    salario DECIMAL(10,2),
+    data_admissao DATE,
+    endereco TEXT,
+    login VARCHAR(50) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE Funcionario (
-    Id_Funcionario INT AUTO_INCREMENT PRIMARY KEY, 
-    Cod_Funcionario INT NOT NULL,                  
-    Nome_Funcionario VARCHAR(225) NOT NULL,        
-    CPF_Funcionario VARCHAR(14) NOT NULL,          
-    Cargo_Funcionario VARCHAR(100) NOT NULL,       
-    Salario_Funcionario DECIMAL(10,2) NOT NULL,    
-    Tel_Funcionario VARCHAR(15) NOT NULL,          
-    Email_Funcionario VARCHAR(225) NOT NULL        
+CREATE TABLE vendas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT,
+    id_funcionario INT,
+    data_venda DATETIME DEFAULT CURRENT_TIMESTAMP,
+    total DECIMAL(10,2),
+    FOREIGN KEY (id_cliente) REFERENCES clientes(id),
+    FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id)
 );
 
-CREATE TABLE Venda (
-    Id_Venda INT AUTO_INCREMENT PRIMARY KEY,        
-    Cod_Venda INT NOT NULL,                          
-    Data_Venda DATE NOT NULL,                        
-    ValorTotal_Venda DECIMAL(10,2) NOT NULL,        
-    QntProduto_Venda INT NOT NULL,                  
-    FormaPagamento_Venda VARCHAR(225) NOT NULL,    
-    Id_Produto INT,                                 
-    Id_Cliente INT,                                  
-    Id_Funcionario INT,                              
-    FOREIGN KEY (Id_Produto) REFERENCES Produto(Id_Produto),   
-    FOREIGN KEY (Id_Cliente) REFERENCES Cliente(Id_Cliente),   
-    FOREIGN KEY (Id_Funcionario) REFERENCES Funcionario(Id_Funcionario)  
+CREATE TABLE itens_venda (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_venda INT,
+    id_produto INT,
+    quantidade INT NOT NULL,
+    preco_unitario DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (id_venda) REFERENCES vendas(id),
+    FOREIGN KEY (id_produto) REFERENCES produtos(id)
 );
 
-INSERT INTO Produto (Cod_Produto, Tipo_Produto, Nome_Produto, Marca_Produto, Estoque_Atual, Valor_Produto) values
-('1', 'Caneta', 'C. Esferográfica', 'Bic', '2000', '02.90'),
-('2', 'Caneta', 'Kit 10 C. Esferográfica', 'Cis', '2000', '18.00'),
-('3', 'Caneta', 'Kit 12 C. Hidrográfica', 'FaberCastell', '1100', '12.00'),
-('4', 'Caneta', 'Kit 24 C. Hidrográfica', 'FaberCastell', '1100', '25.00'),
-('5', 'Caneta', 'C. Gel', 'Bic', '800', '04.99'),
-('6', 'Caneta', 'C. Marcadora', 'Stabilo', '900', '08.00'),
-('7', 'Caneta', 'Kit 5 C. Marcadora', 'Stabilo', '900', '18.00'),
-('8', 'Lapis', 'L. Preto', 'FaberCastell', '3000', '02.90'),
-('9', 'Lapis', 'Kit 24 L. Colorido', 'FaberCastell', '2000', '30.00'),
-('10', 'Lapis','Kit 48 L. Colorido', 'FaberCastell', '2000', '40.00'),
-('11', 'Lapis', 'Lapiseira 0.7', 'FaberCastell', '1000', '07.00'),
-('12', 'Borracha', 'Borracha Macia', 'FaberCastell', '2000', '03.00'),
-('13', 'Apontador', 'Apontador com depósito', 'FaberCastell', '2000', '05.00'),
-('14', 'Caderno', 'Caderno 1 Mat.', 'Spiral', '3000', '30.00'),
-('15', 'Caderno', 'Caderno 10 Mat.', 'Spiral', '3000', '40.00'),
-('16', 'Caderno', 'Caderno 15 Mat.', 'Spiral', '2000', '45.00'),
-('17', 'Caderno', 'Caderno 20 Mat.', 'Spiral', '2000', '50.00'),
-('18', 'Fichario', 'Fichario 1 Mat.', 'Spiral', '1000', '55.00'),
-('19', 'Fichario', 'Fichario 10 Mat.', 'Spiral', '1000', '65.00'),
-('20', 'Pasta', 'Pasta Simples', 'Spiral', '2000', '15.00');
+insert into cliente (nome, telefone, email) values
+('João da Silva', '532.847.726-83', '1199999-8888', 'joao@gmail.com'), 
+('Maria Oliveira','642.638.912-75', '1188888-9999', 'maria@gmail.com');
+
+insert into categoria (nome) values
+('Papelaria'),('Informática');
+
+insert into fornecedor (nome, telefone, email, endereco) values
+('Distribuidora PapelMais', '98.765.432/0001-55', 'administracao@papelmais.com', 'Rua Estefano, 746 - São Paulo'),
+('InfoTech Periféricos', '12.345.678/0001-90', 'contato@infotech.com', 'Av. Josué Magnano, 732 - São Paulo');
+
+insert into produto (nome, descrição, preço, estoque, id_categoria, id_fornecedor) values
+('Caderno universitário', 'Capa dura, 200 folhas', 15.90, 100, 1, 1),
+('Mouse Óptico USB', 'Mouse com fio, 1000 DPI', 25.50, 50, 2, 2);
+
+insert into funcionario (nome, cpf, cargo, salario, data_admissao, endereco, login, senha) values
+('Carlos Souza', '123.456.789-00', 'Recursos Humanos', 2600.00, '2023-03-06', 'Rua Klod, 23 - São Bernardo', 'Carlos00', 'senha123'),
+('Fernanda Lima', '931.658.302-52', 'Caixa/Atendente', 1800.00, '22-12-09', 'Avenida Santos Cabresco, 28 - Santo André11', 'senhal1');
+
+insert into venda (id_cliente, id_funcionario, total) values
+(1, 1, 31.80), (2, 2, 25.50);
+
+
+insert into itens_venda(id_venda, id_produto, quantidade, preco_unitario) values
+(1, 1, 2, 15.90), (2, 1, 25.50);
